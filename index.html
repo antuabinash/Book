@@ -16,25 +16,48 @@
       height: 100vh;
       background-color: #f4f4f9;
     }
-    iframe {
-      width: 80%;
-      height: 90%;
-      border: 2px solid #333;
-    }
-    .container {
-      text-align: center;
-    }
-    h1 {
-      margin-top: 20px;
-      font-size: 24px;
-      color: #333;
+    canvas {
+      border: 1px solid black;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>PDF Viewer</h1>
-    <iframe src="https://antuabinash.github.io/Book/SMRUTI.pdf" frameborder="0"></iframe>
-  </div>
+  <h1>PDF Viewer</h1>
+  <canvas id="pdfCanvas"></canvas>
+
+  <script type="module">
+    import * as pdfjsLib from 'pdf.mjs'; // Path to your uploaded pdf.mjs file
+
+    // Specify the worker file
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.mjs'; // Path to your uploaded pdf.worker.mjs file
+
+    // URL to your PDF file
+    const url = 'https://antuabinash.github.io/Book/SMRUTI.pdf';
+
+    // Asynchronously load the PDF
+    const loadingTask = pdfjsLib.getDocument(url);
+    loadingTask.promise.then(function(pdf) {
+      // Fetch the first page
+      pdf.getPage(1).then(function(page) {
+        const scale = 1.5;
+        const viewport = page.getViewport({ scale: scale });
+
+        // Prepare canvas using PDF page dimensions
+        const canvas = document.getElementById('pdfCanvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        // Render PDF page into canvas context
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport
+        };
+        page.render(renderContext);
+      });
+    }, function (reason) {
+      console.error('Error during PDF loading:', reason);
+    });
+  </script>
 </body>
 </html>
